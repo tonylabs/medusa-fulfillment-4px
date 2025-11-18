@@ -1,0 +1,70 @@
+{
+  "name": "@gerbergpt/medusa-fulfillment-4px",
+  "version": "1.0.0",
+  "displayName": "Medusa v2 Fulfillment 4PX Plugin",
+  "description": "4PX fulfillment service for Medusa V2",
+  "author": "TONYLABS <tony.wang@tonylabs.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tonylabs/medusa-fulfillment-4px"
+  },
+  "files": [
+    ".medusa/server"
+  ],
+  "exports": {
+    "./package.json": "./package.json",
+    "./workflows": "./.medusa/server/src/workflows/index.js",
+    "./.medusa/server/src/modules/*": "./.medusa/server/src/modules/*/index.js",
+    "./modules/*": "./.medusa/server/src/modules/*/index.js",
+    "./providers/*": "./.medusa/server/src/providers/*/index.js",
+    "./*": "./.medusa/server/src/*.js"
+  },
+  "keywords": [
+    "medusa",
+    "plugin",
+    "medusa-plugin",
+    "fulfillment",
+    "4px",
+    "shipping"
+  ],
+  "scripts": {
+    "build": "medusa plugin:build",
+    "dev": "medusa plugin:develop",
+    "push": "medusa plugin:build && yalc publish && yalc push"
+  },
+  "dependencies": {
+    "axios": "^1.13.2"
+  },
+  "devDependencies": {
+    "@medusajs/admin-sdk": "2.11.3",
+    "@medusajs/cli": "2.11.3",
+    "@medusajs/framework": "2.11.3",
+    "@medusajs/medusa": "2.11.3",
+    "@medusajs/test-utils": "2.11.3",
+    "@swc/core": "^1.7.28",
+    "@types/node": "^20.12.11",
+    "@types/react": "^18.3.2",
+    "@types/react-dom": "^18.2.25",
+    "prop-types": "^15.8.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.2",
+    "vite": "^5.4.14",
+    "yalc": "^1.0.0-pre.53"
+  },
+  "peerDependencies": {
+    "@medusajs/admin-sdk": "2.11.3",
+    "@medusajs/cli": "2.11.3",
+    "@medusajs/framework": "2.11.3",
+    "@medusajs/medusa": "2.11.3",
+    "@medusajs/test-utils": "2.11.3"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

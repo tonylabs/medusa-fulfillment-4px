@@ -1,0 +1,43 @@
+# Fulfillment Module Options
+
+In this document, you'll learn about the options of the Fulfillment Module. You can pass these options in `medusa-config.ts`.
+
+## providers
+
+The `providers` option is an array of [Fulfillment Module Providers](https://docs.medusajs.com/commerce-modules/fulfillment/fulfillment-provider).
+
+When the Medusa application starts, these providers are registered and can be used to process fulfillments.
+
+For example:
+
+```ts title="medusa-config.ts"
+import { Modules } from "@medusajs/framework/utils"
+
+// ...
+
+module.exports = defineConfig({
+  // ...
+  modules: [
+    {
+      resolve: "@medusajs/medusa/fulfillment",
+      options: {
+        providers: [
+          {
+            resolve: `@medusajs/medusa/fulfillment-manual`,
+            id: "manual",
+            options: {
+              // provider options...
+            },
+          },
+        ],
+      },
+    },
+  ],
+})
+```
+
+The `providers` option is an array of objects that accept the following properties:
+
+- `resolve`: A string indicating either the package name  of the module provider or its relative path.
+- `id`: A string indicating the provider's unique name or ID.
+- `options`: An optional object of the module provider's options.
