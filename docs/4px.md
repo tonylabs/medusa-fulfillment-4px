@@ -1,4 +1,6 @@
-# 4PX Shipping Service API
+# 4PX Fulfillment Service API
+
+Using the 4PX API to make it as fulfillment provider in Medusa V2.
 
 ## OAuth Authorization
 
@@ -65,7 +67,7 @@ If authorization is successful, the authorization server will redirect the user 
 
 ## Generalized API Request Approach
 
-### Public Request Parameters:
+### Public Request Parameters
 
 | Field        | Type   | Required | Description |
 |--------------|--------|----------|-------------|
@@ -103,7 +105,7 @@ Now you may start calling the API.
 
 Place these parameters in the **request body**, formatted as **JSON**.
 
-## 6. Example Using the Generated Parameters
+## Example Using the Generated Parameters
 
 - **Example Request URL:** https://open.4px.com/router/api/service?method=ds.xms.order.create&app_key=<FOURPX_API_KEY>&v=1.0&timestamp=1532592413187&format=json&sign=c4a41de412206ad4473c72f273082f92
 
@@ -118,12 +120,12 @@ The `sign` parameter is the MD5 value generated from the signature generation pr
 
 ### Production Usage & Code Example
 
-#### 7. 1. After completing integration testing successfully, you may call the API in production.
+#### After completing integration testing successfully, you may call the API in production.
 
 - **HTTP Method:** `POST`
 - **Request URL:** `https://open.4px.com/router/api/service`
 - **Content-Type:** `application/json`
-- These parameters are appended to the URL, joined using `&`. For example: https://open.4px.com/router/api/service?method=ds.xms.order.create&app_key=16081f05-e8fc-4250-b9c4-0660d1ecbb28&v=1.0×tamp=1532592413187&format=json&sign=c4a41de412206ad4473c72f273082f92
+- These parameters are appended to the URL, joined using `&`. For example: https://open.4px.com/router/api/service?method=ds.xms.order.create&app_key=16081f05-e8fc-4250-b9c4-0660d1ecbb28&v=1.0&timestamp=1532592413187&format=json&sign=c4a41de412206ad4473c72f273082f92
 
 | Field        | Type   | Required | Description                                                                                                                                  |
 |--------------|--------|----------|----------------------------------------------------------------------------------------------------------------------------------------------|
@@ -138,10 +140,6 @@ The `sign` parameter is the MD5 value generated from the signature generation pr
 
 - **Body Parameters:** Placed in the request body, formatted as JSON.
 
-## (6) Example Using the Generated Parameters
-
-### Example Request URL
-
 ### Generic API Response
 
 | Field  | Type   | Description |
@@ -155,7 +153,7 @@ The `sign` parameter is the MD5 value generated from the signature generation pr
 2. The top-level JSON structure in the response is fixed.  
 3. Only the `errors` and `data` nodes will vary depending on the response content.
 
-### Generic Error Codes:98
+### Generic Error Codes
 
 | Error Code | Description                    | Solution |
 |------------|--------------------------------|----------|
@@ -185,26 +183,6 @@ The `sign` parameter is the MD5 value generated from the signature generation pr
 Calling this API allows you to create a direct-shipment service forecast order and issue a parcel-level direct-shipment entrust order.
 - Version 1.0.0: Public version
 
-### Request URL
-
-| Environment | HTTP Request URL                                |
-|-------------|--------------------------------------------------|
-| Production  | https://open.4px.com/router/api/service          |
-| Sandbox     | https://open-test.4px.com/router/api/service     |
-
-### Public Parameters
-
-| Field        | Type   | Required | Description |
-|--------------|--------|----------|-------------|
-| method       | String | Yes      | API method name |
-| app_key      | String | Yes      | AppKey obtained when applying for application access |
-| v            | String | Yes      | API protocol version, refer to the interface version number |
-| timestamp    | String | Yes      | Timestamp in milliseconds. Example: the datetime `2018-07-26 16:06:53:187` converts to `1532592413187`. |
-| format       | String | Yes      | Submitted business data format. Default is JSON. Optional value: `json`. |
-| sign         | String | Yes      | Signature result of API input parameters; encrypted signature using App Secret with MD5 algorithm. |
-| access_token | String | No       | Obtained through OAuth authorization. Required for platform service providers and third-party software providers; optional for 4PX customers (Category B customers). |
-| language     | String | No       | Response language. Supports `cn` (Chinese) and `en` (English). |
-
 ### Request Parameters
 
 | Field           | Type   | Max Length | Required | Example         | Description |
@@ -231,7 +209,7 @@ Calling this API allows you to create a direct-shipment service forecast order a
 | declare_insurance         | Double | 32         | false       | 23.4    | Declared insurance fee. Required depending on logistics product + destination country. According to EU IOSS policy, declared value / shipping fee / insurance fee may be declared separately. Supports up to 2 decimal places. |
 | currency_declare_insurance| String | 10         | false       | USD     | Currency for declared insurance fee (ISO standard; must match the import/export declaration currency). |
 
-#### JSON Request Payload Example:
+#### Request Payload JSON Example:
 
 ```json
 {
@@ -543,19 +521,6 @@ Calling this API allows you to query the status, shipping label, and other relat
 > **Note:** When calling the `logistics_channel_no` interface, the logistics channel number (`logistics_channel_no`) and logistics carrier (`logistics_channel_name`) will be returned only if they have values; otherwise they will be empty.  
 > For some logistics products where the tracking number is changed inside the 4PX warehouse, these two fields can only be queried after the in-warehouse operations have been completed.
 
-### Public Parameters
-
-| Field        | Type   | Required | Description |
-|--------------|--------|----------|-------------|
-| method       | String | Yes      | API method name |
-| app_key      | String | Yes      | AppKey obtained when applying for application access |
-| v            | String | Yes      | API protocol version, refer to the interface version number |
-| timestamp    | String | Yes      | Timestamp in milliseconds. For example, datetime `2018-07-26 16:06:53:187` converts to `1532592413187`. |
-| format       | String | Yes      | Submitted business data. Default format is JSON; allowed value: `json`. |
-| sign         | String | Yes      | Signature of API input parameters; encrypted using the App Secret with the MD5 algorithm. |
-| access_token | String | No       | Obtained via OAuth authorization. Required for platform service providers and third-party software providers; optional for 4PX customers (Category B customers). |
-| language     | String | No       | Response language. Supports `cn` (Chinese) and `en` (English). |
-
 ### Request Parameters
 
 | Field                               | Type   | Max Length | Required | Example        | Description |
@@ -565,7 +530,7 @@ Calling this API allows you to query the status, shipping label, and other relat
 | end_time_of_create_consignment      | Long   | 32         | No       | 1432710115000  | Consignment creation end time (*value must be converted to a long timestamp*). Maximum time span: 7 days. |
 | consignment_status                  | String | 32         | No       | P              | Consignment status: `P` – Predicted; `V` – Delivered/Handed Over; `H` – In warehouse / Stored; `C` – Outbound; `F` – Completed; `R` – Returned; `X` – Closed; `ALL` – All statuses (default). |
 
-#### JSON Request Payload Example:
+#### Request Payload JSON Example:
 
 ```json
 {
@@ -638,19 +603,6 @@ Failed Response:
 Customers use this API to cancel a consignment order.
 This interface is used **after the creation and forecast API has been called** (i.e., the order is in *forecasted* status), and **the goods are still in your possession**.
 
-### Public Parameters
-
-| Field        | Type   | Required | Description |
-|--------------|--------|----------|-------------|
-| method       | String | Yes      | API method name |
-| app_key      | String | Yes      | AppKey obtained when applying for application access |
-| v            | String | Yes      | API protocol version; refer to the interface version number |
-| timestamp    | String | Yes      | Timestamp in milliseconds. Example: `2018-07-26 16:06:53:187` → `1532592413187` |
-| format       | String | Yes      | Submitted business data format. Default: `json`; allowed value: `json`. |
-| sign         | String | Yes      | Signature of API input parameters; encrypted using the App Secret with MD5 |
-| access_token | String | No       | Obtained via OAuth; required for platform service providers and third-party software; optional for 4PX (Category B) customers |
-| language     | String | No       | Response language; supports `cn` (Chinese) and `en` (English) |
-
 ### Request Parameters
 
 | Field        | Type   | Max Length | Required | Example | Description |
@@ -658,7 +610,7 @@ This interface is used **after the creation and forecast API has been called** (
 | request_no   | String | 64         | Yes      | —       | Request number |
 | cancel_reason| String | 128        | Yes      | —       | Reason for cancellation |
 
-#### JSON Request Payload Example:
+#### Request Payload JSON Example:
 
 ```json
 {
@@ -712,19 +664,6 @@ Success Response:
 When an interception request is successfully submitted, the order list will display a successful interception flag.  
 After 4PX successfully intercepts the order, it will be handled as an *exception case*, and you will be able to view the intercepted order under the exception-handling section.
 
-### Public Parameters
-
-| Field        | Type   | Required | Description |
-|--------------|--------|----------|-------------|
-| method       | String | Yes      | API method name |
-| app_key      | String | Yes      | AppKey obtained when applying for application access |
-| v            | String | Yes      | API protocol version; refer to the interface version number |
-| timestamp    | String | Yes      | Timestamp in milliseconds. Example: `2018-07-26 16:06:53:187` → `1532592413187` |
-| format       | String | Yes      | Submitted business data. Default: `json`; allowed value: `json`. |
-| sign         | String | Yes      | Signature of API input parameters; encrypted using the App Secret with MD5 |
-| access_token | String | No       | Obtained through OAuth; required for platform service providers and third-party software vendors; optional for 4PX (Category B) customers |
-| language     | String | No       | Response language; supports `cn` (Chinese) and `en` (English) |
-
 ### Request Parameters
 
 | Field        | Type   | Max Length | Required | Example | Description |
@@ -732,7 +671,7 @@ After 4PX successfully intercepts the order, it will be handled as an *exception
 | request_no   | String | 64         | Yes      | —       | Request number |
 | cancel_reason| String | 128        | Yes      | —       | Reason for cancellation |
 
-#### JSON Request Payload Example:
+#### Request Payload JSON Example:
 
 ```json
 {
@@ -794,19 +733,6 @@ This API is used in scenarios where certain logistics products require the last-
 
 **Note:** This interface only supports orders in the “forecasted” (pre-alerted) status.
 
-### Public Parameters
-
-| Field        | Type   | Required | Description |
-|--------------|--------|----------|-------------|
-| method       | String | Yes      | API method name |
-| app_key      | String | Yes      | AppKey obtained when applying for application access |
-| v            | String | Yes      | API protocol version; refer to the interface version number |
-| timestamp    | String | Yes      | Timestamp in milliseconds. Example: `2018-07-26 16:06:53:187` → `1532592413187` |
-| format       | String | Yes      | Submitted business data. Default format: `json`; allowed value: `json`. |
-| sign         | String | Yes      | Signature of API input parameters; encrypted with App Secret using MD5 |
-| access_token | String | No       | Obtained through OAuth; required for platform service providers and third-party vendors; optional for 4PX (Category B) customers |
-| language     | String | No       | Response language; supports `cn` (Chinese) and `en` (English) |
-
 ### Request Parameters
 
 | Field                    | Type   | Max Length | Required | Example          | Description |
@@ -815,7 +741,7 @@ This API is used in scenarios where certain logistics products require the last-
 | label_barcode            | String | 64         | Yes      | 323233456433     | The label barcode to be updated — i.e., the last-mile carrier tracking number to update |
 | service_provider_label_url | String | 128      | Yes      | https://4px456.pdf | URL link to the carrier’s label |
 
-#### JSON Request Payload Example:
+#### Request Payload JSON Example:
 
 ```json
 {
@@ -842,5 +768,174 @@ Success Response:
 {
 	"result": "1",
 	"msg": "System processing succeeded"
+}
+```
+
+---
+
+## Logistics Product Query (ds.xms.logistics_product.getlist)
+
+Logistics product query, use this API to get which 4PX products can be selected as fulfillment options
+
+### Request Parameters
+
+| Field | Type | Max Length | Required | Example | Description |
+|-------|--------|------------|----------|---------|-------------|
+| `transport_mode` | String | 1 | true | 1 | Transportation mode: `1` All modes; `2` International Express; `3` International Small Parcel; `4` Dedicated Line; `5` LianYouTong; `6` Others |
+| `source_country_code` | String | 2 | false | CN | Origin — two-letter country code. *This filter is currently unavailable.* |
+| `source_warehouse_code` | String | 20 | false |  | Origin — warehouse code. *This filter is currently unavailable.* |
+| `dest_country_code` | String | 2 | false | US | Destination — two-letter country code. *This filter is currently unavailable.* |
+
+#### Request Payload JSON Example:
+
+```json
+{
+	"transport_mode": "1"
+}
+```
+
+### Response
+
+#### Response Parameters
+
+| Field | Type | Max Length | Required | Example | Description |
+|-------|--------|------------|----------|---------|-------------|
+| `result` | String | — | — | — | Result value: `0` = failure, `1` = success |
+| `msg` | String | — | — | — | Response message |
+| `errors` | String | — | — | — | Error message |
+| `data` | String | — | — | — | Successful data |
+
+#### Response Data
+
+The following response data is from the `data` key of response parameters.
+
+| Field | Type | Max Length | Required | Example | Description |
+|-------|--------|------------|----------|---------|-------------|
+| `logistics_product_code` | String | — | — | — | Logistics product code |
+| `logistics_product_name_cn` | String | — | — | — | Logistics product name (Chinese) |
+| `logistics_product_name_en` | String | — | — | — | Logistics product name (English) |
+| `transport_mode` | String | 2 | — | — | Transportation mode: `2` International Express; `3` International Small Parcel; `4` Dedicated Line; `5` LianYouTong; `6` Others |
+| `with_battery` | String | — | — | N | Whether batteries are allowed (`Y` = allowed, `N` = not allowed) |
+| `order_track` | String | — | — | Y/N | Trackable (`Y` = trackable, `N` = not trackable) |
+| `billing_volume_weight` | String | — | — | Y/N | Whether volumetric weight is included in billing (`Y` = included, `N` = not included) |
+| `surface_mail` | String | — | — | Y/N | Whether it is surface mail (`Y` = surface mail, `N` = non-surface mail) |
+
+#### Response JSON Example:
+
+```json
+{
+	"data": [
+		{
+			"billing_volume_weight": "Y",
+			"logistics_product_code": "A2",
+			"logistics_product_name_cn": "4PX标准专线",
+			"logistics_product_name_en": "4PX  Express",
+			"order_track": "Y",
+			"surface_mail": "N"
+		},
+		{
+			"billing_volume_weight": "Y",
+			"logistics_product_code": "A5",
+			"logistics_product_name_cn": "DHL华东超值大货",
+			"logistics_product_name_en": "DHL EastChina Heavy",
+			"order_track": "Y",
+			"surface_mail": "N"
+		},
+		{
+			"billing_volume_weight": "N",
+			"logistics_product_code": "A6",
+			"logistics_product_name_cn": "4PX联邮通挂号",
+			"logistics_product_name_en": "LYT GH",
+			"order_track": "Y",
+			"surface_mail": "N"
+		}
+	]
+}
+```
+
+---
+
+## Estimated Cost Query / Freight Calculation (ds.xms.estimated_cost.get)
+
+Estimated Cost Query / Freight Calculation based on region and customer address
+
+### Request Parameters
+
+| Field | Type | Max Length | Required | Example | Description |
+|-------|--------|------------|----------|---------|-------------|
+| `request_no` | String | 64 | specific_true | RV511390022CN | Request number (supports 4PX order no., tracking no., customer order no.). If this field is filled, all other request fields will not take effect. |
+| `country_code` | String | 2 | specific_true | CN | Destination country code (required when request_no is not filled). |
+| `weight` | String | 6 | specific_true | 1200 | Actual weight (in grams; required when request_no is not filled). Must be less than 1,000,000g. |
+| `length` | String | 3 | false | 10 | Length (cm). If any of length/width/height is filled, the other two must also be filled. Must be less than 1000 cm and keep 2 decimal places. |
+| `width` | String | 3 | false | 10 | Width (cm). Same completion rule as length. Must be less than 1000 cm and keep 2 decimal places. |
+| `height` | String | 3 | false | 10 | Height (cm). Same completion rule as length. Must be less than 1000 cm and keep 2 decimal places. |
+| `cargocode` | String | 2 | false | P | Cargo type (`P` = Parcel; `D` = Document). Default: `P`. |
+| `logistics_product_code` | List | 2 | false | A1 | List of logistics product codes. If filled, only the specified products' estimation results will be returned. Max 200 products. |
+| `recipient_post_code` | String | 32 | false | 223 | Postal code. |
+
+#### Request Payload JSON Example:
+
+```json
+{
+	"transport_mode": "1"
+}
+```
+
+### Response
+
+#### Response Parameters
+
+| Field | Type | Max Length | Required | Example | Description |
+|-------|--------|------------|----------|---------|-------------|
+| `result` | String | — | — | — | Result value: `0` = failure, `1` = success |
+| `msg` | String | — | — | — | Response message |
+| `errors` | String | — | — | — | Error message |
+| `data` | String | — | — | — | Successful data |
+
+#### Response Data
+
+The following response data is from the `data` key of response parameters.
+
+| Field | Type | Max Length | Required | Example | Description |
+|-------|--------|------------|----------|---------|-------------|
+| `logistics_product_code` | String | — | — | — | Logistics product code |
+| `logistics_product_name_cn` | String | — | — | — | Logistics product name (Chinese) |
+| `logistics_product_name_en` | String | — | — | — | Logistics product name (English) |
+| `transport_mode` | String | 2 | — | — | Transportation mode: `2` International Express; `3` International Small Parcel; `4` Dedicated Line; `5` LianYouTong; `6` Others |
+| `with_battery` | String | — | — | N | Whether batteries are allowed (`Y` = allowed, `N` = not allowed) |
+| `order_track` | String | — | — | Y/N | Trackable (`Y` = trackable, `N` = not trackable) |
+| `billing_volume_weight` | String | — | — | Y/N | Whether volumetric weight is included in billing (`Y` = included, `N` = not included) |
+| `surface_mail` | String | — | — | Y/N | Whether it is surface mail (`Y` = surface mail, `N` = non-surface mail) |
+
+#### Response JSON Example:
+
+```json
+{
+	"data": [
+		{
+			"billing_volume_weight": "Y",
+			"logistics_product_code": "A2",
+			"logistics_product_name_cn": "4PX标准专线",
+			"logistics_product_name_en": "4PX  Express",
+			"order_track": "Y",
+			"surface_mail": "N"
+		},
+		{
+			"billing_volume_weight": "Y",
+			"logistics_product_code": "A5",
+			"logistics_product_name_cn": "DHL华东超值大货",
+			"logistics_product_name_en": "DHL EastChina Heavy",
+			"order_track": "Y",
+			"surface_mail": "N"
+		},
+		{
+			"billing_volume_weight": "N",
+			"logistics_product_code": "A6",
+			"logistics_product_name_cn": "4PX联邮通挂号",
+			"logistics_product_name_en": "LYT GH",
+			"order_track": "Y",
+			"surface_mail": "N"
+		}
+	]
 }
 ```
