@@ -877,7 +877,14 @@ Estimated Cost Query / Freight Calculation based on region and customer address
 
 ```json
 {
-	"transport_mode": "1"
+	"request_no": "",
+	"country_code": "US",
+	"weight": "1",
+	"length": "100",
+	"width": "999",
+	"height": "999",
+	"cargocode": "P",
+	"logistics_product_code": []
 }
 ```
 
@@ -896,46 +903,37 @@ Estimated Cost Query / Freight Calculation based on region and customer address
 
 The following response data is from the `data` key of response parameters.
 
-| Field | Type | Max Length | Required | Example | Description |
-|-------|--------|------------|----------|---------|-------------|
-| `logistics_product_code` | String | — | — | — | Logistics product code |
-| `logistics_product_name_cn` | String | — | — | — | Logistics product name (Chinese) |
-| `logistics_product_name_en` | String | — | — | — | Logistics product name (English) |
-| `transport_mode` | String | 2 | — | — | Transportation mode: `2` International Express; `3` International Small Parcel; `4` Dedicated Line; `5` LianYouTong; `6` Others |
-| `with_battery` | String | — | — | N | Whether batteries are allowed (`Y` = allowed, `N` = not allowed) |
-| `order_track` | String | — | — | Y/N | Trackable (`Y` = trackable, `N` = not trackable) |
-| `billing_volume_weight` | String | — | — | Y/N | Whether volumetric weight is included in billing (`Y` = included, `N` = not included) |
-| `surface_mail` | String | — | — | Y/N | Whether it is surface mail (`Y` = surface mail, `N` = non-surface mail) |
+| Field | Type | Max Length | Required | Example                                   | Description |
+|-------|--------|------------|----------|-------------------------------------------|-------------|
+| `4px_tracking_no` | String | — | — | 411160040996                              | 4PX tracking number |
+| `ref_no` | String | — | — | API320201203172706                        | Customer order number |
+| `logistics_channel_no` | String | — | — | LF053777692SG                             | Carrier tracking number |
+| `logistics_product_code` | String | — | — | A1                                        | Logistics product code |
+| `lump_sum_fee` | Double | — | — | 245.06                                    | Total fee (CNY) |
+| `is_volume_cargo` | String | — | — | Y                                         | Whether it is volumetric weight cargo (Y/N) |
+| `charge_weight` | String | — | — | 1.02kg                                    | Billing/volumetric weight (returned only if volumetric) |
+| `estimated_time` | String | — | — | 7-10天                                     | Estimated delivery time |
+| `is_show_track` | String | — | — | Y                                         | Whether tracking is available (Y/N) |
+| `remarks` | String | — | — | No tracking data from destination country | Remarks |
+
 
 #### Response JSON Example:
 
 ```json
 {
-	"data": [
-		{
-			"billing_volume_weight": "Y",
-			"logistics_product_code": "A2",
-			"logistics_product_name_cn": "4PX标准专线",
-			"logistics_product_name_en": "4PX  Express",
-			"order_track": "Y",
-			"surface_mail": "N"
-		},
-		{
-			"billing_volume_weight": "Y",
-			"logistics_product_code": "A5",
-			"logistics_product_name_cn": "DHL华东超值大货",
-			"logistics_product_name_en": "DHL EastChina Heavy",
-			"order_track": "Y",
-			"surface_mail": "N"
-		},
-		{
-			"billing_volume_weight": "N",
-			"logistics_product_code": "A6",
-			"logistics_product_name_cn": "4PX联邮通挂号",
-			"logistics_product_name_en": "LYT GH",
-			"order_track": "Y",
-			"surface_mail": "N"
-		}
-	]
+	"data": [{
+        "4px_tracking_no":"500112999268",
+        "charge_weight":"1.000",
+        "estimated_time":"3 - 7",
+        "is_show_track":"Yes",
+        "is_volume_cargo":"N",
+        "logistics_channel_no":"1408696811",
+        "logistics_product_code":"A1",
+        "lump_sum_fee":"413.24",
+        "ref_no":"DJSH002020120300000004",
+        "remarks":""
+    }],
+    "msg": "System processing succeeded",
+    "result": "1"
 }
 ```
