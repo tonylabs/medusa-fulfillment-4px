@@ -67,7 +67,8 @@ module.exports = defineConfig({
   modules: [
     // ... other modules
     {
-      resolve: "@medusajs/medusa/notification",
+      key: Modules.FULFILLMENT,
+      resolve: "@medusajs/fulfillment",
       options: {
         providers: [
           {
@@ -76,6 +77,7 @@ module.exports = defineConfig({
             options: {
               api_key: process.env.FOURPX_API_KEY,
               api_secret: process.env.FOURPX_API_SECRET,
+              sandbox: process.env.FOURPX_ENV === "sandbox",
             },
           },
         ],
@@ -85,10 +87,49 @@ module.exports = defineConfig({
 })
 ```
 
+---
+
 ## Environment Variables
 Create or update your `.env` file with the following variables:
 
 ```bash
 FOURPX_API_KEY=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 FOURPX_API_SECRET=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+FOURPX_ENV="sandbox | production"
+```
+
+---
+
+## Development
+
+The following steps guide you through setting up the plugin locally using `yalc`, a tool that allows you to publish local packages and test them in other projects without pushing them to a registry.
+
+1. Prepare the plugin for local development
+Install dependencies, build the project, and publish it to your local yalc store:
+```bash
+yarn install
+yarn run build
+yarn run pub
+```
+
+2. Navigate to your Medusa backend application and install the plugin:
+
+```bash
+npx medusa plugin:add @gerbergpt/medusa-fulfillment-4px
+```
+
+3. After installation, you should see an entry pointing to the local yalc package:
+
+```json
+"dependencies": {
+  ...,
+  "@gerbergpt/medusa-fulfillment-4px": "file:.yalc/@gerbergpt/medusa-fulfillment-4px",
+  ...
+}
+```
+
+4. Follow the steps in the [configuration](#Configuration) section
+5. When you’re finished with development and testing, remove the local yalc package:
+```bash
+yalc remove  @gerbergpt/medusa-fulfillment-4px
 ```

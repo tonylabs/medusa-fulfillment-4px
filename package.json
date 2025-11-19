@@ -29,8 +29,9 @@
     "shipping"
   ],
   "scripts": {
-    "build": "medusa plugin:build",
     "dev": "medusa plugin:develop",
+    "build": "medusa plugin:build",
+    "pub": "medusa plugin:publish",
     "push": "medusa plugin:build && yalc publish && yalc push"
   },
   "dependencies": {

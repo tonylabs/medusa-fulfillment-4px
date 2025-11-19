@@ -14,7 +14,7 @@
 | response_type | String | Yes      | Must be `code`; this is required by the OAuth specification |
 | redirect_uri  | String | Yes      | Callback URL after successful authorization; must be URL-encoded |
 
-- **Example Request URL:** https://open.4px.com/authorize/get?client_id=<FOURPX_API_KEY>&response_type=code&redirect_uri=http%3A%2F%2Fwww.baidu.com
+- **Example Request URL:** https://open.4px.com/authorize/get?client_id=<FOURPX_API_KEY>&response_type=code&redirect_uri=http%3A%2F%2Fwww.yourstore.com
 
 If authorization is successful, the authorization server will redirect the user to the `redirect_uri`
 
@@ -63,23 +63,9 @@ If authorization is successful, the authorization server will redirect the user 
 
 ---
 
+## Generalized API Request Approach
 
-## 1. Send the HTTP Request
-Once joint debugging is successful, you may start calling the API.
-
-### 1) HTTP Method
-`POST`
-
-### 2) Request URL
-`https://open.4px.com/router/api/service`
-
-### 3) Content-Type
-`application/json`
-
----
-
-## 4. Public Request Parameters
-These parameters are appended **after the URL**, connected with `&`.
+### Public Request Parameters:
 
 | Field        | Type   | Required | Description |
 |--------------|--------|----------|-------------|
@@ -89,21 +75,37 @@ These parameters are appended **after the URL**, connected with `&`.
 | timestamp    | String | Yes      | Timestamp in milliseconds. Example: `2018-07-26 16:06:53:187` → `1532592413187` |
 | format       | String | Yes      | Business data format. Default: `json`; allowed value: `json`. |
 | sign         | String | Yes      | Signature of API input parameters; encrypted using the App Secret via MD5 |
-| access_token | String | Yes\*    | Obtained via OAuth; required for platform service providers & third-party vendors; optional for 4PX category-B customers |
+| access_token | String | Yes      | Obtained via OAuth; required for platform service providers & third-party vendors; optional for 4PX category-B customers |
 | language     | String | No       | Response language. Supported: `cn` (Chinese), `en` (English) |
 
----
+### Signature Generation Rule
 
-## 5. Body Request Parameters
+- Sort all parameters in ascending alphabetical order by their first letter.
+- `access_token` and `language` are not included in the signature generation process.
+- Remove all `=` and `&` symbols, then concatenate each parameter name directly with its value.
+- After that, append the body content and the appSecret at the end.
+- Assume:
+  - appSecret = `7eebf328-8e5a-4030-904d-ec6e89174fbc`
+  - Body content (JSON compact form): `{"aa":"bb"}`
+- The resulting concatenated string becomes: `app_key16081f05-e8fc-4250-b9c4-0660d1ecbb28formatjsonmethodds.xms.order.createtimestamp1532592413187v1.0{"aa":"bb"}7eebf328-8e5a-4030-904d-ec6e89174fbc`
+- Finally, generate a 32-character lowercase MD5 signature (sign) from the concatenated string. (All signatures must use the MD5 algorithm.)
+
+### Calling API
+
+Now you may start calling the API.
+
+- **HTTP Method:** `POST`
+- **Request URL:** `https://open.4px.com/router/api/service`
+- **Content-Type:** `application/json`
+- **Public Request Parameters:** These parameters are appended to the URL and joined with `&`.
+
+### Body Request Parameters
+
 Place these parameters in the **request body**, formatted as **JSON**.
-
----
 
 ## 6. Example Using the Generated Parameters
 
-### Example Request URL
-
-https://open.4px.com/router/api/service?method=ds.xms.order.create&app_key=16081f05-e8fc-4250-b9c4-0660d1ecbb28&v=1.0×tamp=1532592413187&format=json&sign=c4a41de412206ad4473c72f273082f92
+- **Example Request URL:** https://open.4px.com/router/api/service?method=ds.xms.order.create&app_key=<FOURPX_API_KEY>&v=1.0&timestamp=1532592413187&format=json&sign=c4a41de412206ad4473c72f273082f92
 
 ### Notes
 1. The API domain:
@@ -114,7 +116,7 @@ https://open.4px.com/router/api/service?method=ds.xms.order.create&app_key=16081
 The `sign` parameter is the MD5 value generated from the signature generation process.
 
 
-### 7. Production Usage & Code Example
+### Production Usage & Code Example
 
 #### 7. 1. After completing integration testing successfully, you may call the API in production.
 
@@ -140,7 +142,7 @@ The `sign` parameter is the MD5 value generated from the signature generation pr
 
 ### Example Request URL
 
-### 8. API Response
+### Generic API Response
 
 | Field  | Type   | Description |
 |--------|--------|-------------|
@@ -153,7 +155,7 @@ The `sign` parameter is the MD5 value generated from the signature generation pr
 2. The top-level JSON structure in the response is fixed.  
 3. Only the `errors` and `data` nodes will vary depending on the response content.
 
-### 9. Error Codes:
+### Generic Error Codes:98
 
 | Error Code | Description                    | Solution |
 |------------|--------------------------------|----------|
