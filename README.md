@@ -8,7 +8,7 @@
   </a>
 </p>
 <h1 align="center">
-  Medusa SF-Express Fulfillment
+  Medusa 4PX Fulfillment
 </h1>
 
 <h4 align="center">
@@ -27,7 +27,7 @@
   <a href="https://discord.gg/xpCwq3Kfn8">
     <img src="https://img.shields.io/badge/chat-on%20discord-7289DA.svg" alt="Discord Chat" />
   </a>
-  <a href="https://twitter.com/intent/follow?screen_name=medusajs">
+  <a href="https://twitter.com/intent/follow?screen_name=gerbergpt">
     <img src="https://img.shields.io/twitter/follow/medusajs.svg?label=Follow%20@medusajs" alt="Follow @medusajs" />
   </a>
 </p>
