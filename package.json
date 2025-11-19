@@ -32,7 +32,7 @@
     "dev": "medusa plugin:develop",
     "build": "medusa plugin:build",
     "pub": "medusa plugin:publish",
-    "push": "medusa plugin:build && yalc publish && yalc push"
+    "push": "medusa plugin:build && medusa plugin:publish && yalc push"
   },
   "dependencies": {
     "axios": "^1.13.2"
