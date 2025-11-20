@@ -1,5 +1,4 @@
 import crypto from "crypto"
-import axios, { AxiosInstance, AxiosError } from "axios"
 import { MedusaError } from "@medusajs/framework/utils"
 import type { Options } from "./service"
 
@@ -9,7 +8,7 @@ type RequestParams = Record<string, unknown>
 export class Client {
   protected options: Options
   protected baseUrl: string
-  protected http: AxiosInstance
+  protected timeout: number
 
   constructor(options: Options = {}) {
     this.options = options ?? {}
@@ -17,12 +16,7 @@ export class Client {
       ? "https://open-test.4px.com"
       : "https://open.4px.com"
     this.baseUrl = `${baseHost}/router/api/service`
-    this.http = axios.create({
-      timeout: this.options?.timeout ?? 10000,
-      headers: {
-        "Content-Type": "application/json;charset=UTF-8",
-      },
-    })
+    this.timeout = this.options?.timeout ?? 10000
   }
 
   async post(
@@ -74,20 +68,45 @@ export class Client {
       queryParams.append(key, `${value}`)
     })
 
-    console.log(`4PX Global Parameters: ${queryParams}`)
-    console.log(`4PX Signature: ${signature}`);
+    //console.log(`4PX Global Parameters: ${queryParams}`)
+    //console.log(`4PX Signature: ${signature}`)
+
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), this.timeout)
 
     try {
       const url = `${this.baseUrl}?${queryParams.toString()}`
-      const response = await this.http.request({
+      const response = await fetch(url, {
         method: httpMethod,
-        url,
-        data: httpMethod === "POST" ? payload ?? {} : undefined,
+        headers: {
+          "Content-Type": "application/json;charset=UTF-8",
+        },
+        body: httpMethod === "POST" ? JSON.stringify(payload ?? {}) : undefined,
+        signal: controller.signal,
       })
 
-      return this.parseResponse(methodName, response.data)
+      const responseText = await response.text()
+      let responseBody: any
+      try {
+        responseBody = responseText ? JSON.parse(responseText) : {}
+      } catch {
+        responseBody = responseText
+      }
+
+      if (!response.ok) {
+        throw new MedusaError(
+          MedusaError.Types.UNEXPECTED_STATE,
+          `4PX ${methodName} request failed (status ${response.status}): ${this.stringifyError(
+            responseBody
+          )}`
+        )
+      }
+
+      return this.parseResponse(methodName, responseBody)
     } catch (error) {
       throw this.normalizeError(error, methodName)
+    } finally {
+      clearTimeout(timeoutId)
     }
   }
 
@@ -145,24 +164,22 @@ export class Client {
   }
 
   protected normalizeError(error: unknown, methodName: string) {
-    if (axios.isAxiosError(error)) {
-      const axiosError = error as AxiosError
-      const status = axiosError.response?.status
-      const payload = axiosError.response?.data
-      const detail = payload
-        ? this.stringifyError(payload)
-        : axiosError.message ?? "Unknown error"
+    if (error instanceof MedusaError) {
+      return error
+    }
 
+    if ((error as Error)?.name === "AbortError") {
       return new MedusaError(
         MedusaError.Types.UNEXPECTED_STATE,
-        `4PX ${methodName} request failed${
-          status ? ` (status ${status})` : ""
-        }: ${detail}`
+        `4PX ${methodName} request timed out after ${this.timeout}ms`
       )
     }
 
-    if (error instanceof MedusaError) {
-      return error
+    if (error instanceof Error) {
+      return new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        `4PX ${methodName} request failed: ${error.message}`
+      )
     }
 
     return new MedusaError(

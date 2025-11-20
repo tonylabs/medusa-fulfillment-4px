@@ -34,9 +34,7 @@
     "pub": "medusa plugin:publish",
     "push": "medusa plugin:build && medusa plugin:publish && yalc push"
   },
-  "dependencies": {
-    "axios": "^1.13.2"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@medusajs/admin-sdk": "2.11.3",
     "@medusajs/cli": "2.11.3",
