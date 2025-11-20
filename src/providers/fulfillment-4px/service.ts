@@ -34,6 +34,8 @@ export type Options = {
   timeout?: number
   default_warehouse_code?: string
   default_origin_country?: string
+  default_destination_country?: string
+  default_transport_mode?: string
   default_currency?: string
   default_business_type?: string
   default_duty_type?: string
@@ -60,7 +62,6 @@ class FourPXFulfillmentProviderService extends AbstractFulfillmentProviderServic
 
   async getFulfillmentOptions(): Promise<FulfillmentOption[]> {
     const products = await this.retrieveLogisticsProducts()
-
     return products.map((product) => this.toFulfillmentOption(product))
   }
 
@@ -96,9 +97,7 @@ class FourPXFulfillmentProviderService extends AbstractFulfillmentProviderServic
     if (data.price_type !== "calculated") {
       return true
     }
-
     const supported = this.getSupportedPriceTypes(data.data ?? {})
-
     return supported.includes("calculated")
   }
 
@@ -113,10 +112,8 @@ class FourPXFulfillmentProviderService extends AbstractFulfillmentProviderServic
     context: CalculateShippingOptionPriceContext
   ): Promise<CalculatedShippingOptionPrice> {
     const priceType = this.resolvePriceType(optionData)
-
     if (priceType === "flat") {
       const flatAmount = this.resolveFlatAmount(optionData, data)
-
       return {
         calculated_amount: flatAmount,
         is_calculated_price_tax_inclusive: false,
@@ -133,6 +130,8 @@ class FourPXFulfillmentProviderService extends AbstractFulfillmentProviderServic
       "ds.xms.estimated_cost.get",
       estimationPayload
     )
+
+    console.log("Estimated shipping cost:", JSON.stringify(response, null, 2));
 
     const amount = this.extractEstimatedAmount(response?.data ?? response)
 
@@ -215,28 +214,29 @@ class FourPXFulfillmentProviderService extends AbstractFulfillmentProviderServic
       return this.productsCache.items
     }
 
-    const payload: Record<string, unknown> = {
+    const payload: Record<string, unknown> = this.compactObject({
       page_no: 1,
       page_size: 200,
-    }
-
-    if (this.options_.default_warehouse_code) {
-      payload.warehouse_code = this.options_.default_warehouse_code
-    }
+      transport_mode: this.options_.default_transport_mode ?? "1",
+      source_country_code: this.options_.default_origin_country,
+      source_warehouse_code: this.options_.default_warehouse_code,
+      dest_country_code: this.options_.default_destination_country,
+    })
 
     try {
       const response = await this.client.post(
         "ds.xms.logistics_product.getlist",
         payload
       )
-
+      console.log(
+        "[4PX] logistics_product.getlist raw response:",
+        JSON.stringify(response)
+      )
       const list = this.extractList(response?.data ?? response)
-
       this.productsCache = {
         items: list,
         expires_at: Date.now() + 5 * 60 * 1000,
       }
-
       return list
     } catch (error) {
       this.logger_.error(
@@ -250,13 +250,15 @@ class FourPXFulfillmentProviderService extends AbstractFulfillmentProviderServic
 
   protected toFulfillmentOption(product: LogisticsProduct): FulfillmentOption {
     const productCode = this.getProductCode(product)
+    const friendlyName =
+      this.getProp<string>(product, "logistics_product_name_en") ??
+      this.getProp<string>(product, "logistics_product_name") ??
+      this.getProp<string>(product, "product_name") ??
+      productCode
 
     return {
       id: productCode,
-      name:
-        this.getProp<string>(product, "logistics_product_name") ??
-        this.getProp<string>(product, "product_name") ??
-        productCode,
+      name: friendlyName,
       product_code: productCode,
       logistics_channel_code:
         this.getProp<string>(product, "logistics_channel_code") ??
@@ -345,14 +347,46 @@ class FourPXFulfillmentProviderService extends AbstractFulfillmentProviderServic
   protected buildEstimatedCostPayload(
     optionData: Record<string, unknown>,
     data: Record<string, unknown>,
-    context: CalculateShippingOptionPriceContext
+    context: CalculateShippingOptionPriceContext,
+    measurements: ReturnType<
+      FourPXFulfillmentProviderService["getPackageMeasurements"]
+    > = this.getPackageMeasurements(context)
   ): Record<string, unknown> {
+
+    console.log(
+      "Estimating cost with:",
+      JSON.stringify(
+        {
+          optionData,
+          data,
+          measurements,
+        },
+        null,
+        2
+      )
+    )
+
     const shippingAddress = context.shipping_address ?? {}
     const shipping = shippingAddress as Record<string, unknown>
-    const measurements = this.getPackageMeasurements(context)
+    const requestNo = this.resolveRequestNo(optionData, data)
+    const countryCode = this.resolveCountryCode(optionData, data, shipping)
+    const weightGrams = this.resolveWeight(optionData, data, measurements)
+    const dimensions = this.normalizeDimensions(optionData, data)
     const currency = this.resolveCurrency(optionData, data, context)
 
+    this.assertEstimatedCostRequirements({
+      requestNo,
+      countryCode,
+      weight: weightGrams,
+    })
+
     const payload: Record<string, unknown> = {
+      request_no: requestNo,
+      country_code: countryCode,
+      weight: weightGrams ? this.formatWeight(weightGrams) : undefined,
+      length: dimensions.length,
+      width: dimensions.width,
+      height: dimensions.height,
       logistics_product_code: this.getProductCode(optionData),
       destination_country:
         this.getProp<string>(shipping, "country_code") ??
@@ -365,7 +399,6 @@ class FourPXFulfillmentProviderService extends AbstractFulfillmentProviderServic
         this.getProp<string>(shipping, "postal_code") ??
         this.getProp<string>(shipping, "zip_code"),
       parcel_qty: measurements.parcel_qty || 1,
-      weight: measurements.weight_kg,
       declared_value: this.toMajorUnits(measurements.declared_value),
       currency,
       warehouse_code:
@@ -388,7 +421,154 @@ class FourPXFulfillmentProviderService extends AbstractFulfillmentProviderServic
       package_list: measurements.packages,
     }
 
+    console.log(
+      "Getting price for payload:",
+      JSON.stringify(payload, null, 2)
+    )
+
     return this.compactObject(payload)
+  }
+
+  protected resolveRequestNo(
+    optionData: Record<string, unknown>,
+    data: Record<string, unknown>
+  ): string | undefined {
+    const requestNo =
+      this.getProp<string>(data, "request_no") ??
+      this.getProp<string>(optionData, "request_no")
+
+    const normalized = requestNo?.toString?.().trim?.()
+
+    return normalized || undefined
+  }
+
+  protected resolveCountryCode(
+    optionData: Record<string, unknown>,
+    data: Record<string, unknown>,
+    shipping: Record<string, unknown>
+  ): string | undefined {
+    const rawCountry =
+      this.getProp<string>(data, "country_code") ??
+      this.getProp<string>(optionData, "country_code") ??
+      this.getProp<string>(shipping, "country_code") ??
+      this.getProp<string>(shipping, "country")
+
+    const normalized = rawCountry?.toString?.().trim?.().toUpperCase?.()
+
+    return normalized || undefined
+  }
+
+  protected resolveWeight(
+    optionData: Record<string, unknown>,
+    data: Record<string, unknown>,
+    measurements: ReturnType<
+      FourPXFulfillmentProviderService["getPackageMeasurements"]
+    >
+  ): number {
+    const explicitWeight =
+      this.toNumber(this.getProp<number | string>(data, "weight")) ||
+      this.toNumber(this.getProp<number | string>(optionData, "weight")) ||
+      this.toNumber(this.getProp<number | string>(data, "weight_grams")) ||
+      this.toNumber(this.getProp<number | string>(optionData, "weight_grams"))
+
+    if (explicitWeight > 0) {
+      return explicitWeight
+    }
+
+    return measurements?.weight_grams ?? 0
+  }
+
+  protected normalizeDimensions(
+    optionData: Record<string, unknown>,
+    data: Record<string, unknown>
+  ): {
+    length?: string
+    width?: string
+    height?: string
+  } {
+    const rawLength = this.toNumber(
+      this.getProp<number | string>(data, "length") ??
+        this.getProp<number | string>(optionData, "length")
+    )
+    const rawWidth = this.toNumber(
+      this.getProp<number | string>(data, "width") ??
+        this.getProp<number | string>(optionData, "width")
+    )
+    const rawHeight = this.toNumber(
+      this.getProp<number | string>(data, "height") ??
+        this.getProp<number | string>(optionData, "height")
+    )
+
+    const hasAnyDimension =
+      rawLength > 0 || rawWidth > 0 || rawHeight > 0
+    const hasAllDimensions =
+      rawLength > 0 && rawWidth > 0 && rawHeight > 0
+
+    if (!hasAnyDimension) {
+      return {}
+    }
+
+    if (!hasAllDimensions) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        "Length, width, and height must all be provided for 4PX estimated cost."
+      )
+    }
+
+    return {
+      length: this.formatDimension(rawLength, "length"),
+      width: this.formatDimension(rawWidth, "width"),
+      height: this.formatDimension(rawHeight, "height"),
+    }
+  }
+
+  protected formatDimension(value: number, field: string): string {
+    const rounded = Number(value.toFixed(2))
+
+    if (rounded <= 0) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        `4PX estimated cost ${field} must be greater than zero.`
+      )
+    }
+
+    if (rounded >= 1000) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        `4PX estimated cost ${field} must be less than 1000 cm and use two decimal places.`
+      )
+    }
+
+    return rounded.toFixed(2)
+  }
+
+  protected formatWeight(weightGrams: number): string {
+    const rounded = Math.round(weightGrams * 100) / 100
+    return `${rounded}`
+  }
+
+  protected assertEstimatedCostRequirements(input: {
+    requestNo?: string
+    countryCode?: string
+    weight?: number
+  }) {
+    if (input.requestNo) {
+      return
+    }
+
+    if (!input.countryCode) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        "Country code is required when request_no is not provided for 4PX estimated cost."
+      )
+    }
+
+    if (!input.weight || input.weight <= 0) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        "Weight (in grams) is required when request_no is not provided for 4PX estimated cost."
+      )
+    }
   }
 
   protected extractEstimatedAmount(input: any): number {

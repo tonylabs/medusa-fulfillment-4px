@@ -20,7 +20,7 @@ export class Client {
     this.http = axios.create({
       timeout: this.options?.timeout ?? 10000,
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/json;charset=UTF-8",
       },
     })
   }
@@ -61,19 +61,21 @@ export class Client {
     if (this.options.language) {
       baseParams.language = this.options.language
     }
-
-    const sign = this.generateSignature(baseParams, payload)
+    const signature = this.generateSignature(baseParams, payload)
     const queryParams = new URLSearchParams()
 
     Object.entries({
       ...baseParams,
-      sign,
+      sign: signature,
     }).forEach(([key, value]) => {
       if (value === undefined || value === null) {
         return
       }
       queryParams.append(key, `${value}`)
     })
+
+    console.log(`4PX Global Parameters: ${queryParams}`)
+    console.log(`4PX Signature: ${signature}`);
 
     try {
       const url = `${this.baseUrl}?${queryParams.toString()}`
