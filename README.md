@@ -63,12 +63,22 @@ module.exports = defineConfig({
               api_key: process.env.FOURPX_API_KEY,
               api_secret: process.env.FOURPX_API_SECRET,
               sandbox: process.env.FOURPX_ENV === "sandbox",
+              //source_country_code: 'CN',
+              //language: 'en',
+              //default_transport_mode: 2
             },
           },
         ],
       },
     },
-  ]
+  ],
+  ...,
+  plugins: [
+    {
+      resolve: "@gerbergpt/medusa-fulfillment-4px",
+      options: {},
+    },
+  ],
 })
 ```
 
@@ -87,14 +97,17 @@ FOURPX_ENV="sandbox | production"
 
 ## Development
 
+- [Medusa Plugin Development](https://docs.medusajs.com/learn/fundamentals/plugins/create)
+
 The following steps guide you through setting up the plugin locally using `yalc`, a tool that allows you to publish local packages and test them in other projects without pushing them to a registry.
 
 1. Prepare the plugin for local development
 Install dependencies, build the project, and publish it to your local yalc store:
+
 ```bash
 yarn install
 yarn run build
-yarn run pub
+yarn run publish
 ```
 
 2. Navigate to your Medusa backend application and install the plugin:
@@ -114,7 +127,9 @@ npx medusa plugin:add @gerbergpt/medusa-fulfillment-4px
 ```
 
 4. Follow the steps in the [configuration](#Configuration) section
-5. When you’re finished with development and testing, remove the local yalc package:
+5. You can now begin development by running the `yarn run dev` command. The Medusa backend server will automatically restart whenever you make changes to this plugin.
+5. When you have completed development and testing, remove the local published yalc package:
+
 ```bash
 yalc remove  @gerbergpt/medusa-fulfillment-4px
 ```
