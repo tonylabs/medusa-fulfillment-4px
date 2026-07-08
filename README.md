@@ -105,9 +105,9 @@ The following steps guide you through setting up the plugin locally using `yalc`
 Install dependencies, build the project, and publish it to your local yalc store:
 
 ```bash
+cd medusa-fulfillment-4px
 yarn install
-yarn run build
-yarn run publish
+npx medusa plugin:publish
 ```
 
 2. Navigate to your Medusa backend application and install the plugin:

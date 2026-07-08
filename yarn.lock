@@ -1372,9 +1372,9 @@
     tailwindcss "^3.4.3"
     vite "^5.4.14"
 
-"@medusajs/admin-sdk@2.11.3":
+"@medusajs/admin-sdk@^2.0.0":
   version "2.11.3"
-  resolved "https://registry.npmjs.org/@medusajs/admin-sdk/-/admin-sdk-2.11.3.tgz"
+  resolved "https://registry.yarnpkg.com/@medusajs/admin-sdk/-/admin-sdk-2.11.3.tgz#7128283785bed79c870f2426ffa514a23ac59437"
   integrity sha512-x/maPB4U6Uj++abRDtcwg0ANqs15Pav4Y+4KmHDfCKl5aNTX4i6uAu2FTL+v/fgcNAg+RJz18DkODvhnkbhgyA==
   dependencies:
     "@medusajs/admin-shared" "2.11.3"
@@ -1478,9 +1478,9 @@
   resolved "https://registry.npmjs.org/@medusajs/cart/-/cart-2.11.3.tgz"
   integrity sha512-AQhUaoqraFHjK8Tu/nH9EzYCyo2VD82k3lD6pWbdHqTqhgW6WYkYUDWjVyJd6ZbGgzDIaJxk5IPDWZ1Y9qW8+Q==
 
-"@medusajs/cli@2.11.3":
+"@medusajs/cli@^2.0.0":
   version "2.11.3"
-  resolved "https://registry.npmjs.org/@medusajs/cli/-/cli-2.11.3.tgz"
+  resolved "https://registry.yarnpkg.com/@medusajs/cli/-/cli-2.11.3.tgz#8e5645461d68c1fc39025404ae1ff73bdc701ec4"
   integrity sha512-rJOWHuZbbfxeCgAOa9G6b9DhCRwsQ03fcyrmpwicpCojNMezhEk/EYj5GH7veCvSP0poMnTaCTo+rsszHI5s2A==
   dependencies:
     "@medusajs/deps" "2.11.3"
@@ -1641,9 +1641,9 @@
   resolved "https://registry.npmjs.org/@medusajs/file/-/file-2.11.3.tgz"
   integrity sha512-c9ET4ChE+tWMnRVdiSJpXBcmQ2AyQbHfVfSPqGSccxh0AwNrUSu0wxg/4Ferd74bIw8CryfasIjBGKFk9NfW+A==
 
-"@medusajs/framework@2.11.3":
+"@medusajs/framework@^2.0.0":
   version "2.11.3"
-  resolved "https://registry.npmjs.org/@medusajs/framework/-/framework-2.11.3.tgz"
+  resolved "https://registry.yarnpkg.com/@medusajs/framework/-/framework-2.11.3.tgz#d89c5eafa72058d458d175c5e68d79edabe92244"
   integrity sha512-CWRhArOq2+vVkImbt+CgJHfo4pBTkYovP//81jTN/REzhwdAjITbWxlXn2HkdYlTOalLXltWPpAE0ZL2IUKuWw==
   dependencies:
     "@jercle/yargonaut" "^1.1.5"
@@ -1681,9 +1681,9 @@
   resolved "https://registry.npmjs.org/@medusajs/fulfillment/-/fulfillment-2.11.3.tgz"
   integrity sha512-L/A6u9A9Kr4y2pzDpbmq9VCqNx0Uhdi0yP0ErlBpOfgw5FVuV/UNxbQ6Qrb16YGC7hKuKQlJillmL/IPH6ItZg==
 
-"@medusajs/icons@2.11.3":
+"@medusajs/icons@2.11.3", "@medusajs/icons@^2.0.0":
   version "2.11.3"
-  resolved "https://registry.npmjs.org/@medusajs/icons/-/icons-2.11.3.tgz"
+  resolved "https://registry.yarnpkg.com/@medusajs/icons/-/icons-2.11.3.tgz#04584c5cbbaef2b368a2cffc25c34b8e83b36c74"
   integrity sha512-WV+ZsjZiY3jQVYejPuyC09MbAb15eisQ+bY63GjGvYs4rirjIPxSH2Y6XADWDYQTdKoj3Ffy7c04hL9FgBQV6w==
 
 "@medusajs/index@2.11.3":
@@ -1726,9 +1726,9 @@
   resolved "https://registry.npmjs.org/@medusajs/locking/-/locking-2.11.3.tgz"
   integrity sha512-FZoRYW4fMHxP8yhAAFxvCoN3JBOpTSnF3MscLkRzujkY7mhZ8UTSGQHhneSHAGdTlQMcWfo6iGjk56z/6z28oA==
 
-"@medusajs/medusa@2.11.3":
+"@medusajs/medusa@^2.0.0":
   version "2.11.3"
-  resolved "https://registry.npmjs.org/@medusajs/medusa/-/medusa-2.11.3.tgz"
+  resolved "https://registry.yarnpkg.com/@medusajs/medusa/-/medusa-2.11.3.tgz#cde07fd0c2f2e25c6802d1a5c55ab26e1d82cff0"
   integrity sha512-odwPwpX0D1aL3biSxw7GGsJy/npKH7UcRCXaZOibnSXLSzZccezsuZDhNSiu0NMTqXnPfP8Vnb0VPM29R+dr1w==
   dependencies:
     "@inquirer/checkbox" "^2.3.11"
@@ -1913,9 +1913,9 @@
     remove-trailing-slash "^0.1.1"
     uuid "^9.0.0"
 
-"@medusajs/test-utils@2.11.3":
+"@medusajs/test-utils@^2.0.0":
   version "2.11.3"
-  resolved "https://registry.npmjs.org/@medusajs/test-utils/-/test-utils-2.11.3.tgz"
+  resolved "https://registry.yarnpkg.com/@medusajs/test-utils/-/test-utils-2.11.3.tgz#ff17865ad6dcb06b3010f50486e9ed2291526562"
   integrity sha512-uWYXc24OFAfltWGHR5OHbTJK/T+Yok8mHXG/4kXTJ4jTm6u46/UUJ0aXOaLNw+3mkkxkVgPxYLj1T1O0UyZWCw==
   dependencies:
     "@types/express" "^4.17.21"
@@ -1931,7 +1931,7 @@
   dependencies:
     bignumber.js "^9.1.2"
 
-"@medusajs/ui@4.0.27":
+"@medusajs/ui@4.0.27", "@medusajs/ui@^4.0.4":
   version "4.0.27"
   resolved "https://registry.yarnpkg.com/@medusajs/ui/-/ui-4.0.27.tgz#99c9505597eb7ca99b86f49ed440e8826598fc64"
   integrity sha512-yYc5BwLTLDkfdL6CoIps6hEGR5X3AbdXmG+plKk1YRXXSG4kjMog/92ED0QUz9jxHROa+DWzzWWYw/TcJN+c9Q==
@@ -5720,7 +5720,7 @@ axios-retry@^3.1.9:
     "@babel/runtime" "^7.15.4"
     is-retry-allowed "^2.2.0"
 
-axios@^1.12.0, axios@^1.13.1, axios@^1.13.2:
+axios@^1.12.0, axios@^1.13.1:
   version "1.13.2"
   resolved "https://registry.npmjs.org/axios/-/axios-1.13.2.tgz"
   integrity sha512-VPk9ebNqPcy5lRGuSlKx752IlDatOjT9paPlm8A7yOuW2Fbvp4X3JznJtT4f0GzGLLiWE9W8onz51SqLYwzGaA==

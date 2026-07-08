@@ -28,6 +28,7 @@ export type Options = {
   api_key?: string
   api_secret?: string
   sandbox?: boolean
+  debug?: boolean
   api_version?: string
   access_token?: string
   language?: string
@@ -56,8 +57,9 @@ class FourPXFulfillmentProviderService extends AbstractFulfillmentProviderServic
   constructor({ logger }: InjectedDependencies, options: Options = {}) {
     super()
     this.logger_ = logger
-    this.options_ = options ?? {}
-    this.client = new Client(this.options_)
+    const resolvedOptions = { debug: false, ...(options ?? {}) }
+    this.options_ = resolvedOptions
+    this.client = new Client(resolvedOptions)
   }
 
   async getFulfillmentOptions(): Promise<FulfillmentOption[]> {
@@ -120,7 +122,7 @@ class FourPXFulfillmentProviderService extends AbstractFulfillmentProviderServic
       }
     }
 
-    const estimationPayload = this.buildEstimatedCostPayload(
+    const payload = this.buildEstimatedCostPayload(
       optionData,
       data,
       context
@@ -128,12 +130,19 @@ class FourPXFulfillmentProviderService extends AbstractFulfillmentProviderServic
 
     const response = await this.client.post(
       "ds.xms.estimated_cost.get",
-      estimationPayload
+      payload
     )
 
-    console.log("Estimated shipping cost:", JSON.stringify(response, null, 2));
+    this.debug(`JSON Response: ${response.data}`);
 
-    const amount = this.extractEstimatedAmount(response?.data ?? response)
+    const amount = this.getLowestShippingFee(
+      this.unwrapResponseData(this.parseApiPayload(response?.data ?? response))
+    )
+
+    this.debug(
+      "4PX Shipping amount:",
+      amount
+    )
 
     return {
       calculated_amount: amount,
@@ -228,10 +237,12 @@ class FourPXFulfillmentProviderService extends AbstractFulfillmentProviderServic
         "ds.xms.logistics_product.getlist",
         payload
       )
-      console.log(
+
+      this.debug(
         "[4PX] logistics_product.getlist raw response:",
         JSON.stringify(response)
       )
+
       const list = this.extractList(response?.data ?? response)
       this.productsCache = {
         items: list,
@@ -255,10 +266,13 @@ class FourPXFulfillmentProviderService extends AbstractFulfillmentProviderServic
       this.getProp<string>(product, "logistics_product_name") ??
       this.getProp<string>(product, "product_name") ??
       productCode
+    const friendlyNameWithCode = productCode
+      ? `${friendlyName} [${productCode}]`
+      : friendlyName
 
     return {
       id: productCode,
-      name: friendlyName,
+      name: friendlyNameWithCode,
       product_code: productCode,
       logistics_channel_code:
         this.getProp<string>(product, "logistics_channel_code") ??
@@ -353,7 +367,7 @@ class FourPXFulfillmentProviderService extends AbstractFulfillmentProviderServic
     > = this.getPackageMeasurements(context)
   ): Record<string, unknown> {
 
-    console.log(
+    this.debug(
       "Estimating cost with:",
       JSON.stringify(
         {
@@ -419,9 +433,10 @@ class FourPXFulfillmentProviderService extends AbstractFulfillmentProviderServic
         this.getProp<string>(optionData, "sender_country") ??
         this.options_.default_origin_country,
       package_list: measurements.packages,
+      cargocode: "P"
     }
 
-    console.log(
+    this.debug(
       "Getting price for payload:",
       JSON.stringify(payload, null, 2)
     )
@@ -571,33 +586,37 @@ class FourPXFulfillmentProviderService extends AbstractFulfillmentProviderServic
     }
   }
 
-  protected extractEstimatedAmount(input: any): number {
-    const data = this.ensureObject(input)
-
-    if (!data) {
+  protected getLowestShippingFee(
+    input: Record<string, any> | Record<string, any>[] | undefined
+  ): number {
+    if (!input) {
       return 0
     }
 
-    const amountCandidate =
-      data?.total_fee ??
-      data?.total_price ??
-      data?.estimated_fee ??
-      data?.estimated_price ??
-      data?.amount ??
-      data?.price ??
-      (Array.isArray(data?.charges_detail)
-        ? data.charges_detail.reduce(
-            (sum: number, charge: Record<string, unknown>) =>
-              sum + Number(charge?.amount ?? 0),
-            0
-          )
-        : undefined)
+    const candidates = Array.isArray(input) ? input : [input]
+    let lowest: number | undefined
 
-    return this.toMinorUnits(amountCandidate)
+    for (const candidate of candidates) {
+      if (!candidate || typeof candidate !== "object") {
+        continue
+      }
+
+      const fee = this.toNumber((candidate as any)?.lump_sum_fee)
+
+      if (fee <= 0) {
+        continue
+      }
+
+      if (lowest === undefined || fee < lowest) {
+        lowest = fee
+      }
+    }
+
+    return lowest !== undefined ? Number(lowest.toFixed(2)) : 0
   }
 
   protected extractList(input: any): LogisticsProduct[] {
-    const data = this.ensureObject(input)
+    const data = this.unwrapResponseData(this.parseApiPayload(input))
 
     if (Array.isArray(data)) {
       return data
@@ -616,26 +635,6 @@ class FourPXFulfillmentProviderService extends AbstractFulfillmentProviderServic
     }
 
     return []
-  }
-
-  protected ensureObject(value: any): Record<string, any> | undefined {
-    if (!value) {
-      return undefined
-    }
-
-    if (typeof value === "string") {
-      try {
-        return JSON.parse(value)
-      } catch {
-        return undefined
-      }
-    }
-
-    if (typeof value === "object") {
-      return value
-    }
-
-    return undefined
   }
 
   protected getPackageMeasurements(context: CalculateShippingOptionPriceContext) {
@@ -772,6 +771,59 @@ class FourPXFulfillmentProviderService extends AbstractFulfillmentProviderServic
 
       return acc
     }, {} as T)
+  }
+
+  protected parseApiPayload(
+    input: any
+  ): Record<string, any> | Record<string, any>[] | undefined {
+    if (input === undefined || input === null) {
+      return undefined
+    }
+
+    if (typeof input === "string") {
+      try {
+        return JSON.parse(input)
+      } catch (error) {
+        this.logger_.warn?.(
+          `[4PX] Failed to parse JSON response: ${
+            (error as Error)?.message ?? "Unknown error"
+          }`
+        )
+        return undefined
+      }
+    }
+
+    return input
+  }
+
+  protected unwrapResponseData(
+    payload: Record<string, any> | Record<string, any>[] | undefined
+  ): Record<string, any> | Record<string, any>[] | undefined {
+    if (!payload) {
+      return undefined
+    }
+
+    if (Array.isArray(payload) || typeof payload !== "object") {
+      return payload
+    }
+
+    const container = payload as Record<string, any>
+    const nested =
+      container.data ??
+      container.response ??
+      container.payload ??
+      container.items ??
+      container.list ??
+      container.logistics_product_list
+
+    return nested !== undefined ? nested : container
+  }
+
+  protected debug(...args: unknown[]) {
+    if (!this.options_.debug) {
+      return
+    }
+    console.log(...args)
   }
 }
 

@@ -11,7 +11,7 @@ export class Client {
   protected timeout: number
 
   constructor(options: Options = {}) {
-    this.options = options ?? {}
+    this.options = { debug: false, ...(options ?? {}) }
     const baseHost = this.options?.sandbox
       ? "https://open-test.4px.com"
       : "https://open.4px.com"
@@ -84,6 +84,8 @@ export class Client {
         body: httpMethod === "POST" ? JSON.stringify(payload ?? {}) : undefined,
         signal: controller.signal,
       })
+
+      //console.log(`HTTP Response: ${await response.text()}`)
 
       const responseText = await response.text()
       let responseBody: any
